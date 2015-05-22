@@ -1,7 +1,7 @@
 <?PHP
 
 namespace daos\mysql;
-    
+
 /**
  * Base class for database access -- mysql
  *
@@ -19,7 +19,7 @@ class Database {
      */
     static private $initialized = false;
 
-    
+
     /**
      * establish connection and
      * create undefined tables
@@ -34,14 +34,14 @@ class Database {
                 \F3::get('db_username'),
                 \F3::get('db_password')
             ));
-            
+
             // create tables if necessary
             $result = @\F3::get('db')->exec('SHOW TABLES');
             $tables = array();
             foreach($result as $table)
                 foreach($table as $key=>$value)
                     $tables[] = $value;
-            
+
             if(!in_array(\F3::get('db_prefix').'items', $tables)) {
                 \F3::get('db')->exec('
                     CREATE TABLE '.\F3::get('db_prefix').'items (
@@ -76,7 +76,7 @@ class Database {
                         END;
                 ');
             }
-            
+
             $isNewestSourcesTable = false;
             if(!in_array(\F3::get('db_prefix').'sources', $tables)) {
                 \F3::get('db')->exec('
@@ -93,7 +93,7 @@ class Database {
                 ');
                 $isNewestSourcesTable = true;
             }
-            
+
             // version 1 or new
             if(!in_array(\F3::get('db_prefix').'version', $tables)) {
                 \F3::get('db')->exec('
@@ -101,18 +101,18 @@ class Database {
                         version INT
                     ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
                 ');
-                
+
                 \F3::get('db')->exec('
                     INSERT INTO '.\F3::get('db_prefix').'version (version) VALUES (6);
                 ');
-                
+
                 \F3::get('db')->exec('
                     CREATE TABLE '.\F3::get('db_prefix').'tags (
                         tag         TEXT NOT NULL,
                         color       VARCHAR(7) NOT NULL
                     ) ENGINE = MYISAM DEFAULT CHARSET=utf8;
                 ');
-                
+
                 if($isNewestSourcesTable===false) {
                     \F3::get('db')->exec('
                         ALTER TABLE '.\F3::get('db_prefix').'sources ADD tags TEXT;
@@ -122,7 +122,7 @@ class Database {
             else{
                 $version = @\F3::get('db')->exec('SELECT version FROM '.\F3::get('db_prefix').'version ORDER BY version DESC LIMIT 0, 1');
                 $version = $version[0]['version'];
-                
+
                 if(strnatcmp($version, "3") < 0){
                     \F3::get('db')->exec('
                         ALTER TABLE '.\F3::get('db_prefix').'sources ADD lastupdate INT;
@@ -170,7 +170,7 @@ class Database {
                     ');
                 }
             }
-            
+
             // just initialize once
             self::$initialized = true;
         }
@@ -178,8 +178,8 @@ class Database {
         $class = 'daos\\' . \F3::get('db_type') . '\\Statements';
         $this->stmt = new $class();
     }
-    
-    
+
+
     /**
      * optimize database by
      * database own optimize statement

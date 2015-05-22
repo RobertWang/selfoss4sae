@@ -34,8 +34,8 @@ class Sources extends Database {
                         ':params' => htmlentities(json_encode($params))
                     ));
     }
-    
-    
+
+
     /**
      * edit source
      *
@@ -60,8 +60,8 @@ class Sources extends Database {
                         ':id'     => $id
                     ));
     }
-    
-    
+
+
     /**
      * delete source
      *
@@ -71,13 +71,13 @@ class Sources extends Database {
     public function delete($id) {
         \F3::get('db')->exec('DELETE FROM '.\F3::get('db_prefix').'sources WHERE id=:id',
                     array(':id' => $id));
-        
+
         // delete items of this source
         \F3::get('db')->exec('DELETE FROM '.\F3::get('db_prefix').'items WHERE source=:id',
                     array(':id' => $id));
     }
-    
-    
+
+
     /**
      * save error message
      *
@@ -130,10 +130,10 @@ class Sources extends Database {
             $ret[$i]['spout_obj'] = $spoutLoader->get( $ret[$i]['spout'] );
         return $ret;
     }
-    
-    
+
+
     /**
-     * returns specified source (false if it doesnt exist) 
+     * returns specified source (false if it doesnt exist)
      * or all sources if no id specified
      *
      * @param integer $id (optional) specification of source id
@@ -149,9 +149,9 @@ class Sources extends Database {
                 $ret = $ret[0];
                 $ret['spout_obj'] = $spoutLoader->get( $ret['spout'] );
             } else {
-                $ret = false;    
+                $ret = false;
             }
-        } else { 
+        } else {
             $ret = \F3::get('db')->exec('SELECT id, title, tags, spout, params, filter, error FROM '.\F3::get('db_prefix').'sources ORDER BY error DESC, lower(title) ASC');
             $spoutLoader = new \helpers\SpoutLoader();
             for($i=0;$i<count($ret);$i++)
@@ -159,7 +159,7 @@ class Sources extends Database {
         }
         return $ret;
     }
-    
+
 
     /**
      * returns all sources including unread count
@@ -175,7 +175,7 @@ class Sources extends Database {
             GROUP BY sources.id, sources.title
             ORDER BY lower(sources.title) ASC');
     }
-    
+
 
     /**
      * returns all sources including last icon
@@ -183,22 +183,23 @@ class Sources extends Database {
      * @return mixed all sources
      */
     public function getWithIcon() {
-        $ret = \F3::get('db')->exec('SELECT
+        $query = 'SELECT
                 sources.id, sources.title, sources.tags, sources.spout,
                 sources.params, sources.filter, sources.error,
                 sourceicons.icon AS icon
             FROM '.\F3::get('db_prefix').'sources AS sources
             LEFT OUTER JOIN
                 (SELECT items.source, icon
-                 FROM '.\F3::get('db_prefix').'items,
+                 FROM '.\F3::get('db_prefix').'items AS items,
                       (SELECT source, MAX(id) as maxid
-                       FROM '.\F3::get('db_prefix').'items
+                       FROM '.\F3::get('db_prefix').'items AS items
                        WHERE icon IS NOT NULL AND icon != \'\'
                        GROUP BY items.source) AS icons
                  WHERE items.id=icons.maxid AND items.source=icons.source
                  ) AS sourceicons
                 ON sources.id=sourceicons.source
-            ORDER BY '.$this->stmt->nullFirst('sources.error', 'DESC').', lower(sources.title)');
+            ORDER BY '.$this->stmt->nullFirst('sources.error', 'DESC').', lower(sources.title)';
+        $ret = \F3::get('db')->exec($query);
         $spoutLoader = new \helpers\SpoutLoader();
         for($i=0;$i<count($ret);$i++)
             $ret[$i]['spout_obj'] = $spoutLoader->get( $ret[$i]['spout'] );
@@ -215,17 +216,17 @@ class Sources extends Database {
      */
     public function isValid($name, $value) {
         $return = false;
-        
+
         switch ($name) {
         case 'id':
             $return = is_numeric($value);
             break;
         }
-        
+
         return $return;
     }
-    
-    
+
+
     /**
      * returns all tags
      *
@@ -242,7 +243,7 @@ class Sources extends Database {
     /**
      * returns tags of a source
      *
-     * @param integer $id 
+     * @param integer $id
      * @return mixed tags of a source
      */
     public function getTags($id) {
@@ -263,7 +264,7 @@ class Sources extends Database {
      * @return integer id if any record is found.
      * @param  string  $title
      * @param  string  $spout the source type
-     * @param  mixed   $params depends from spout     
+     * @param  mixed   $params depends from spout
      * @return mixed   all sources
      */
     public function checkIfExists($title, $spout, $params) {
@@ -278,5 +279,5 @@ class Sources extends Database {
              return $result[0]['id'];
          }
          return 0;
-     }   
+     }
 }

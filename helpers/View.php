@@ -151,7 +151,8 @@ class View {
         $targetJs = \F3::get('BASEDIR').'/public/'.self::getGlobalJsFileName();
         //if(!file_exists($targetJs) || \F3::get('DEBUG')!=0) {
         $js = "";
-        if( !file_exists($targetJs) ) {
+        $existsMiniJs = file_exists($targetJs);
+        if( !$existsMiniJs ) {
             foreach(\F3::get('js') as $file)
                 $js = $js . "\n" . $this->minifyJs(file_get_contents(\F3::get('BASEDIR').'/'.$file));
             // file_put_contents($targetJs, $js);
@@ -161,13 +162,14 @@ class View {
         $targetCss = \F3::get('BASEDIR').'/public/'.self::getGlobalCssFileName();
         //if(!file_exists($targetCss) || \F3::get('DEBUG')!=0) {
         $css = "";
-        if( !file_exists($targetCss) ) {
+        $existsMiniCss = file_exists($targetCss);
+        if( !$existsMiniCss ) {
             foreach(\F3::get('css') as $file)
                 $css = $css . "\n" . $this->minifyCss(file_get_contents(\F3::get('BASEDIR').'/'.$file));
             // file_put_contents($targetCss, $css);
         }
 
-        if ( isLocalDevMode() ) {
+        if ( isLocalDevMode() && !$existsMiniJs && !$existsMiniCss ) {
             echo '// ', $targetJs, ' -- gen by helpers:View:genMinifiedJsAndCss()', PHP_EOL, PHP_EOL;
             echo $js;
             echo PHP_EOL, PHP_EOL;

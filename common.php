@@ -48,7 +48,6 @@ foreach($f3->get('ENV') as $key => $value) {
         $f3->set(strtolower(substr($key,strlen($env_prefix))),$value);
     }
 }
-// var_dump($f3);exit;
 
 // init logger
 // @todo: 创建日志记录点
