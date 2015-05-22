@@ -60,6 +60,8 @@ $f3->route('GET /update',     'controllers\Index->update');   // text
 $f3->route('GET /badge',      'controllers\Index->badge');    // xml
 $f3->route('GET /win8notifs', 'controllers\Index->win8Notifications');    // xml
 
+$f3->route('GET /icon/@path', 'controllers\Index->icon');     // bin
+
 // only for loggedin users or on public mode
 $f3->route('GET /rss',           'controllers\Rss->rss');           // rss
 $f3->route('GET /feed',          'controllers\Rss->rss');           // rss
@@ -92,6 +94,7 @@ $f3->route('POST /tags/color',          'controllers\Tags->color');           //
 $f3->route('GET  /opml',                'controllers\Opml->show');            // html
 $f3->route('POST /opml',                'controllers\Opml->add');             // html
 $f3->route('GET  /opmlexport',          'controllers\Opml->export');          // xml
+
 
 // dispatch
 $f3->run();

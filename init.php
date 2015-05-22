@@ -4,6 +4,7 @@
  * create for SinaAppEngine
  * author : RK . cnwangyl@gmail.com
  */
+define('APP_ROOT', __DIR__);
 function isLocalDevMode () {
     return ( in_array($_SERVER['SERVER_ADDR'], array('127.0.0.1', 'localhost')) );
 }
@@ -56,6 +57,7 @@ $config = array(
     'auto_hide_read_on_mobile' => 0,
     'env_prefix' => 'selfoss_',
     'env_dirs' => array(
+        'base' => SAE_TMP_PATH,   // 文件存储目录
         'cache' => SAE_TMP_PATH.'/rss_cache',   // 缓存目录
         'favicons' => SAE_TMP_PATH.'/rss_favicon',   // 网站icon缓存
         'fulltextrss' => SAE_TMP_PATH.'/rss_ftrss', // fulltext rss

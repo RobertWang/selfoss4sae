@@ -11,7 +11,7 @@ namespace controllers;
  * @author     Tobias Zeising <tobias.zeising@aditu.de>
  */
 class Index extends BaseController {
-    
+
     /**
      * home site
      * html
@@ -21,39 +21,39 @@ class Index extends BaseController {
     public function home() {
         // check login
         $this->authentication();
-        
+
         // parse params
         $options = array();
         if (\F3::get('homepage')!='')
             $options = array( 'type' => \F3::get('homepage') );
-        
+
         // use ajax given params?
         if(count($_GET)>0)
             $options = $_GET;
-        
+
         // get search param
         if(isset($options['search']) && strlen($options['search'])>0)
             $this->view->search = $options['search'];
-        
+
         // load tags
         $tagsDao = new \daos\Tags();
         $tags = $tagsDao->getWithUnread();
-        
+
         // load items
         $itemsHtml = $this->loadItems($options, $tags);
         $this->view->content = $itemsHtml;
-        
+
         // load stats
         $itemsDao = new \daos\Items();
         $stats = $itemsDao->stats();
         $this->view->statsAll = $stats['total'];
         $this->view->statsUnread = $stats['unread'];
         $this->view->statsStarred = $stats['starred'];
-        
+
         // prepare tags display list
         $tagsController = new \controllers\Tags();
         $this->view->tags = $tagsController->renderTags($tags);
-        
+
         if(isset($options['sourcesNav']) && $options['sourcesNav'] == 'true' ) {
             // prepare sources display list
             $sourcesDao = new \daos\Sources();
@@ -62,7 +62,7 @@ class Index extends BaseController {
             $this->view->sources = $sourcesController->renderSources($sources);
         } else
             $this->view->sources = '';
-        
+
         // ajax call = only send entries and statistics not full template
         if(isset($options['ajax'])) {
             $this->view->jsonSuccess(array(
@@ -74,14 +74,14 @@ class Index extends BaseController {
                 "sources"  => $this->view->sources
             ));
         }
-        
+
         // show as full html page
         $this->view->publicMode = \F3::get('auth')->isLoggedin()!==true && \F3::get('public')==1;
         $this->view->loggedin = \F3::get('auth')->isLoggedin()===true;
         echo $this->view->render('templates/home.phtml');
     }
-    
-    
+
+
     /**
      * password hash generator
      * html
@@ -95,8 +95,8 @@ class Index extends BaseController {
             $this->view->hash = hash("sha512", \F3::get('salt') . $_POST['password']);
         echo $this->view->render('templates/login.phtml');
     }
-    
-    
+
+
     /**
      * check and show login/logout
      * html
@@ -109,9 +109,9 @@ class Index extends BaseController {
             \F3::get('auth')->logout();
             \F3::reroute($this->view->base);
         }
-        
+
         // login
-        if( 
+        if(
             isset($_GET['login']) || (\F3::get('auth')->isLoggedin()!==true && \F3::get('public')!=1)
            ) {
 
@@ -126,7 +126,7 @@ class Index extends BaseController {
                         $this->view->error = 'invalid username/password';
                 }
             }
-            
+
             // show login
             if(count($_POST)==0 || isset($this->view->error))
                 die($this->view->render('templates/login.phtml'));
@@ -134,8 +134,8 @@ class Index extends BaseController {
                 \F3::reroute($this->view->base);
         }
     }
-    
-    
+
+
     /**
      * login for api json access
      * json
@@ -146,17 +146,17 @@ class Index extends BaseController {
         $view = new \helpers\View();
         $username = isset($_REQUEST["username"]) ? $_REQUEST["username"] : '';
         $password = isset($_REQUEST["password"]) ? $_REQUEST["password"] : '';
-        
+
         if(\F3::get('auth')->login($username,$password)==true)
             $view->jsonSuccess(array(
                 'success' => true
             ));
-        
+
         $view->jsonSuccess(array(
             'success' => false
         ));
     }
-    
+
 
     /**
      * logout for api json access
@@ -171,8 +171,8 @@ class Index extends BaseController {
             'success' => true
         ));
     }
-    
-    
+
+
     /**
      * update feeds
      * text
@@ -181,16 +181,16 @@ class Index extends BaseController {
      */
     public function update() {
         // only allow access for localhost and loggedin users
-        if (\F3::get('allow_public_update_access')!=1 
-                && $_SERVER['REMOTE_ADDR'] !== $_SERVER['SERVER_ADDR'] 
+        if (\F3::get('allow_public_update_access')!=1
+                && $_SERVER['REMOTE_ADDR'] !== $_SERVER['SERVER_ADDR']
                 && $_SERVER['REMOTE_ADDR'] !== "127.0.0.1"
                 && \F3::get('auth')->isLoggedin() != 1)
             die("unallowed access");
-    
+
         // update feeds
         $loader = new \helpers\ContentLoader();
         $loader->update();
-        
+
         echo "finished";
     }
 
@@ -216,11 +216,11 @@ class Index extends BaseController {
      */
     private function loadItems($options, $tags) {
         $tagColors = $this->convertTagsToAssocArray($tags);
-        
+
         $itemDao = new \daos\Items();
         $itemsHtml = "";
         foreach($itemDao->get($options) as $item) {
-        
+
             // parse tags and assign tag colors
             $itemsTags = explode(",",$item['tags']);
             $item['tags'] = array();
@@ -229,7 +229,7 @@ class Index extends BaseController {
                 if(strlen($tag)>0 && isset($tagColors[$tag]))
                     $item['tags'][$tag] = $tagColors[$tag];
             }
-            
+
             $this->view->item = $item;
             $itemsHtml .= $this->view->render('templates/item.phtml');
         }
@@ -241,11 +241,11 @@ class Index extends BaseController {
                 $itemsHtml .= '<div class="stream-more"><span>'. \F3::get('lang_more').'</span></div>';
                 $itemsHtml .= '<div class="mark-these-read"><span>'. \F3::get('lang_markread').'</span></div>';
         }
-        
+
         return $itemsHtml;
     }
-    
-    
+
+
     /**
      * return tag => color array
      *
@@ -259,5 +259,22 @@ class Index extends BaseController {
             $assocTags[$tag['tag']]['foreColor'] = \helpers\Color::colorByBrightness($tag['color']);
         }
         return $assocTags;
+    }
+
+    /**
+     * return icon => image binary
+     *
+     * @return icon image binary
+     * @param array $tmp_path
+     */
+    public function icon() {
+        $dirs = \F3::get('env_dirs');
+        $icon_dir = $dirs['favicons'].'/';
+        $file = $icon_dir.\F3::get('PARAMS["path"]');
+        if ( !file_exists($file) ) {
+            $file = APP_ROOT.'/public/images/logo.png';
+        }
+        header('Content-Type: image/png');
+        echo file_get_contents($file);
     }
 }

@@ -1,5 +1,5 @@
 <?php
-
+exit;
 // Only run this if running from php 5.4 embedded server
 if (php_sapi_name() == 'cli-server') {
 
